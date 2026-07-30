@@ -28,6 +28,11 @@ INSTALLS += udevrule
 # NB: name must sort AFTER 999-android-system.rules (which forces MODE 0660 on
 # USB nodes) so our MODE 0666 wins — hence "999-veroval", not "99-".
 
+TRANSLATIONS += translations/harbour-svero-de.ts
+lupdate_only {
+    SOURCES += qml/*.qml qml/pages/*.qml qml/cover/*.qml
+}
+
 DISTFILES += \
     qml/harbour-svero.qml \
     qml/pages/MainPage.qml \
