@@ -7,6 +7,8 @@ It talks to the monitor's **Prolific PL2303** USB-serial bridge **directly via
 the kernel's raw `usbdevfs` interface** — no `libusb` and no in-kernel `pl2303`
 driver are required (neither is present on a stock device).
 
+![svero chart — systolic / diastolic / pulse over three months](screenshots/chart.png)
+
 ## What works
 
 * **Download over USB-C** — reads both memory banks (Person 1 *and* Person 2)
