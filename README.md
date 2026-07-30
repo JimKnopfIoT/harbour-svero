@@ -1,7 +1,7 @@
 # svero
 
-A native **Sailfish OS** app that downloads the stored measurements from a
-**Veroval** blood-pressure monitor over USB, charts them, and exports them.
+A native, **unofficial** Sailfish OS app that downloads the stored measurements
+from a **Veroval** blood-pressure monitor over USB, charts them, and exports them.
 
 It talks to the monitor's **Prolific PL2303** USB-serial bridge **directly via
 the kernel's raw `usbdevfs` interface** — no `libusb` and no in-kernel `pl2303`
@@ -11,7 +11,7 @@ driver are required (neither is present on a stock device).
 
 ## What works
 
-* **Download over USB-C** — reads both memory banks (Person 1 *and* Person 2)
+* **Download over USB** — reads both memory banks (Person 1 *and* Person 2)
   and merges them.
 * **Growing archive** — the device only holds ~99 readings; each download is
   **merged** into a persistent local archive (de-duplicated by person +
@@ -63,10 +63,3 @@ device node `/dev/bus/usb/*`.
 The wire protocol was reconstructed from community reverse-engineering — see
 [ATTRIBUTION.md](ATTRIBUTION.md). Licensed **GPL-3.0-or-later**
 ([LICENSE](LICENSE)).
-
-## Disclaimer
-
-Not a medical device and **not** affiliated with or endorsed by
-PAUL HARTMANN AG / Veroval. It only reads what the monitor already stored; it
-does not diagnose. Discuss your readings with a health professional.
-"Veroval" and "Prolific" are trademarks of their respective owners.

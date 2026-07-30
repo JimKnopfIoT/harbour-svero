@@ -86,7 +86,7 @@ Page {
         ViewPlaceholder {
             enabled: veroval.count === 0 && !veroval.busy
             text: qsTr("No measurements")
-            hintText: qsTr("Connect the Veroval via USB-C (data cable), put it into "
+            hintText: qsTr("Connect the Veroval via USB (data cable), put it into "
                          + "PC/transfer mode, then pull down and download.")
         }
 
