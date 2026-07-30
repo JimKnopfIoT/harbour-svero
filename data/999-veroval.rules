@@ -1,0 +1,5 @@
+# Make the Veroval BP monitor's USB node world-accessible so the unsandboxed
+# app can talk to the PL2303 via usbdevfs without root or a kernel driver.
+# NB: must live in /etc/udev/rules.d on SailfishOS (udev does not read
+# /usr/lib/udev/rules.d there).
+SUBSYSTEM=="usb", ATTR{idVendor}=="067b", ATTR{idProduct}=="2303", MODE="0666"

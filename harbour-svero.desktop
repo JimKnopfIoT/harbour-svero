@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+X-Nemo-Application-Type=silica-qt5
+Icon=harbour-svero
+Exec=harbour-svero
+Name=svero
+# No [X-Sailjail] section on purpose: the app needs raw access to the USB
+# device node (/dev/bus/usb/*), which the sandbox would block.
