@@ -3,7 +3,7 @@
 
 Name:       harbour-svero
 Summary:    Read & chart Veroval blood-pressure measurements over USB
-Version:    0.1.0
+Version:    0.2.0
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-svero
@@ -43,5 +43,11 @@ over time, and exports CSV and an image.
 %config %{_sysconfdir}/udev/rules.d/999-veroval.rules
 
 %changelog
+* Mon Aug 03 2026 harbour-svero contributors 0.2.0-1
+- Chart opens with a left swipe instead of the pull-down menu.
+- Assign each reading to person 1 or 2; the chart plots one person at a time.
+- Chart: pinch to zoom the time window, drag to move it, tap to inspect a reading.
+- Chart: hypertension grades marked at 140/160/180; scale follows readings beyond 40-200.
+
 * Thu Jul 30 2026 harbour-svero contributors 0.1.0-1
 - Initial: PL2303 usbdevfs transport, BPM record download + parse, CSV export.

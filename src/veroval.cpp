@@ -72,6 +72,7 @@ void VeroWorker::run()
 Veroval::Veroval(QObject *parent) : QObject(parent)
 {
     m_status = tr("Not connected");
+    loadSettings();
     loadData();
 }
 
@@ -83,6 +84,40 @@ void Veroval::setStatus(const QString &s)
 void Veroval::setBaud(int b)
 {
     if (m_baud != b) { m_baud = b; emit baudChanged(); }
+}
+
+void Veroval::setChartPerson(int person)
+{
+    const int p = (person == 2) ? 2 : 1;
+    if (m_chartPerson == p)
+        return;
+    m_chartPerson = p;
+    saveSettings();
+    emit chartPersonChanged();
+}
+
+int Veroval::personOf(const QVariantMap &m)
+{
+    const QVariant override = m.value(QStringLiteral("person"));
+    const int p = override.isValid() ? override.toInt()
+                                     : m.value(QStringLiteral("user")).toInt();
+    return (p == 2) ? 2 : 1;
+}
+
+void Veroval::assignPerson(int index, int person)
+{
+    if (index < 0 || index >= m_measurements.size())
+        return;
+    QVariantMap m = m_measurements.at(index).toMap();
+    const int p = (person == 2) ? 2 : 1;
+    if (personOf(m) == p)
+        return;
+    m.insert(QStringLiteral("person"), p);
+    m_measurements[index] = m;
+    saveData();
+    // Deliberately not measurementsChanged: see personRevision in the header.
+    ++m_personRevision;
+    emit personRevisionChanged();
 }
 
 void Veroval::download()
@@ -150,6 +185,34 @@ QString Veroval::dataFile() const
     return dir + QStringLiteral("/last-download.json");
 }
 
+QString Veroval::settingsFile() const
+{
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (dir.isEmpty())
+        dir = QDir::homePath();
+    return dir + QStringLiteral("/settings.json");
+}
+
+void Veroval::saveSettings() const
+{
+    QDir().mkpath(QFileInfo(settingsFile()).absolutePath());
+    QJsonObject obj;
+    obj.insert(QStringLiteral("chartPerson"), m_chartPerson);
+    QFile f(settingsFile());
+    if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        f.write(QJsonDocument(obj).toJson(QJsonDocument::Compact));
+}
+
+void Veroval::loadSettings()
+{
+    QFile f(settingsFile());
+    if (!f.open(QIODevice::ReadOnly))
+        return;
+    const QJsonObject obj = QJsonDocument::fromJson(f.readAll()).object();
+    const int p = obj.value(QStringLiteral("chartPerson")).toInt(1);
+    m_chartPerson = (p == 2) ? 2 : 1;
+}
+
 static QJsonObject archiveToJson(const QVariantList &measurements)
 {
     QJsonArray arr;
@@ -178,8 +241,14 @@ void Veroval::loadData()
     const QJsonArray arr = QJsonDocument::fromJson(f.readAll())
                                .object().value(QStringLiteral("measurements")).toArray();
     m_measurements.clear();
-    for (const QJsonValue &v : arr)
-        m_measurements.append(v.toObject().toVariantMap());
+    for (const QJsonValue &v : arr) {
+        QVariantMap m = v.toObject().toVariantMap();
+        // Archives written before the P1/P2 override existed carry no `person`;
+        // seed it from the device's memory slot so the chart can filter on it.
+        if (!m.contains(QStringLiteral("person")))
+            m.insert(QStringLiteral("person"), personOf(m));
+        m_measurements.append(m);
+    }
     // keep newest-first ordering
     std::sort(m_measurements.begin(), m_measurements.end(),
               [](const QVariant &a, const QVariant &b) {
@@ -282,10 +351,12 @@ int Veroval::mergeRecords(const QVariantList &recs)
         keys.insert(keyFor(v.toMap()));
     int added = 0;
     for (const QVariant &v : recs) {
-        const QVariantMap m = v.toMap();
+        QVariantMap m = v.toMap();
         const QString k = keyFor(m);
-        if (keys.contains(k)) continue;
-        keys.insert(k);
+        if (keys.contains(k)) continue;      // keeps the existing record, and
+        keys.insert(k);                      // with it any person assignment
+        if (!m.contains(QStringLiteral("person")))
+            m.insert(QStringLiteral("person"), personOf(m));
         m_measurements.append(m);
         ++added;
     }
@@ -373,11 +444,12 @@ QString Veroval::exportCsv()
         emit actionError(tr("Cannot write %1").arg(path));
         return QString();
     }
-    f.write("timestamp,user,systolic,diastolic,pulse,arrhythmia\n");
+    f.write("timestamp,person,user,systolic,diastolic,pulse,arrhythmia\n");
     for (const QVariant &v : m_measurements) {
         const QVariantMap m = v.toMap();
-        const QString line = QStringLiteral("%1,%2,%3,%4,%5,%6\n")
+        const QString line = QStringLiteral("%1,%2,%3,%4,%5,%6,%7\n")
             .arg(m.value(QStringLiteral("timestamp")).toString())
+            .arg(personOf(m))
             .arg(m.value(QStringLiteral("user")).toInt())
             .arg(m.value(QStringLiteral("systolic")).toInt())
             .arg(m.value(QStringLiteral("diastolic")).toInt())
