@@ -7,7 +7,18 @@ It talks to the monitor's **Prolific PL2303** USB-serial bridge **directly via
 the kernel's raw `usbdevfs` interface** — no `libusb` and no in-kernel `pl2303`
 driver are required (neither is present on a stock device).
 
-![svero chart — systolic / diastolic / pulse over three months](screenshots/chart.png)
+<p>
+<img src="screenshots/list.png" alt="Reading list with a P1/P2 switch per measurement" width="46%">
+&nbsp;
+<img src="screenshots/chart.png" alt="Systolic, diastolic and pulse over two weeks" width="46%">
+</p>
+
+<p>
+<img src="screenshots/chart-landscape.png" alt="The same chart in landscape orientation" width="94%">
+</p>
+
+*(Screenshots show generated sample data, and a German system language — the
+app ships English and German.)*
 
 ## What works
 
@@ -17,9 +28,15 @@ driver are required (neither is present on a stock device).
   **merged** into a persistent local archive (de-duplicated by person +
   timestamp), so you can accumulate months or a whole year across several
   downloads. Save/load named archive files to back up or combine series.
-* **Chart** — systolic / diastolic / pulse over time on a modern canvas with a
-  two-handle **range slider**, tappable points with a detail read-out, and a
-  subtle “optimum” band around 120/80. Mirrored time axis (newest on the left).
+* **Chart** — systolic / diastolic / pulse over time, reached by swiping left.
+  **Pinch** the chart to zoom the shown period (down to a week), **drag** it to
+  move the window; tappable points with a detail read-out, a subtle “optimum”
+  band around 120/80 and the hypertension thresholds (140 / 160 / 180) marked.
+  Mirrored time axis (newest on the left).
+* **Two people** — the monitor's own Person 1 / Person 2 banks are read as they
+  are, and every reading additionally carries a P1/P2 switch you can correct
+  yourself. The assignment is stored in the archive and survives further
+  downloads; the chart shows one person at a time.
 * **Exports** — CSV, and the chart as an image (JPG).
 * A plausibility filter drops implausible records so averages stay clean.
 
@@ -37,7 +54,8 @@ driver are required (neither is present on a stock device).
 1. Plug the monitor into the phone (USB host mode) and put it into its
    PC/transfer mode.
 2. Pull down → **Download from device**. Repeat over time; the archive grows.
-3. **Chart / graph** to view; drag the range-slider handles to pick any window.
+3. Swipe left for the chart; pinch it to zoom and drag it sideways to pick a
+   window.
 4. **Save archive to file** / **Load archive file…** to back up or merge series.
 
 A bundled udev rule (`data/999-veroval.rules`) makes the USB node accessible
